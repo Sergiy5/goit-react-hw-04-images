@@ -12,7 +12,7 @@ const App = () => {
   const [images, setImages] = useState([])
   const [query, setQuery] = useState('')
   const [page, setPage] = useState(1)
-  const [lastPage, setLastPage] = useState(0)
+  // const [lastPage, setLastPage] = useState(0)
   const [status, setStatus]= useState('idle')
   const [showModal, setShowModal] = useState(false)
   const [currentImage, setCurrentImage] = useState('')
@@ -27,7 +27,7 @@ const App = () => {
     FetchAPI(query)
       .then(images => {
         console.log('2');
-        setLastPage(()=>calculateLastPage(12, images.totalHits));
+        const lastPage = calculateLastPage(images.totalHits);
       // setLastPage(Math.ceil(Number(images.totalHits) / 12));
         if (images.hits.length) {
           setImages(images.hits);
@@ -43,12 +43,15 @@ const App = () => {
         setError(error);
         setStatus('rejected');
       })
+      return
     };
     if (page > 1) {
       console.log('4');
       setStatus('pending');
       FetchAPI(query, page)
         .then(newImages => {
+        const lastPage = calculateLastPage(images.totalHits);
+
           setImages(prevImg=>[...prevImg, ...newImages.hits]);
           setStatus(lastPage === page ? 'idle' : 'resolved');
         })
@@ -58,10 +61,11 @@ const App = () => {
         });
     }  
      return
-  }, [page, query]);
+  }, [images.totalHits, page, query]);
 
- const calculateLastPage = (itemsOnPage, totalItems) => {
-    const lastPage = Math.ceil(Number(totalItems) / itemsOnPage);
+  const calculateLastPage = (totalItems) => {
+   
+    const lastPage = Math.ceil(Number(totalItems) / 12);
     return lastPage;
   };
 
@@ -117,7 +121,7 @@ App.propTypes = {
     images: PropTypes.arrayOf(PropTypes.shape({})),
     query: PropTypes.string.isRequired,
     page: PropTypes.number.isRequired,
-    lastPage: PropTypes.number.isRequired,
+    // lastPage: PropTypes.number.isRequired,
     status: PropTypes.string.isRequired,
     showModal: PropTypes.bool.isRequired,
     currentImage: PropTypes.string.isRequired,
